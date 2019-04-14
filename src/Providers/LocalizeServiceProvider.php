@@ -25,4 +25,11 @@ class LocalizeServiceProvider extends ServiceProvider
         });
         $this->app->alias(LocalizeContract::class, 'localize');
     }
+
+    public function register()
+    {
+        $this->publishes([
+            __DIR__.'/../../config/localize.php' => config_path('localize.php')
+        ], 'config');
+    }
 }
