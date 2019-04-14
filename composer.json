@@ -2,7 +2,7 @@
     "name": "eslym/laravel-easy-localize",
     "description": "Laravel Easy Localize",
     "type": "library",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "require": {
         "php": ">=7.1",
         "laravel/framework": ">=5.6 <6.0"
