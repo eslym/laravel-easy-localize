@@ -1,0 +1,32 @@
+{
+    "name": "eslym/laravel-easy-localize",
+    "description": "Laravel Easy Localize",
+    "type": "library",
+    "version": "1.0.0",
+    "require": {
+        "php": ">=7.1",
+        "laravel/framework": ">=5.6 <6.0"
+    },
+    "license": "mit",
+    "authors": [
+        {
+            "name": "eslym",
+            "email": "engshun.lim@gmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Eslym\\EasyLocalize\\" : "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Eslym\\EasyLocalize\\Providers\\LocalizeServiceProvider"
+            ],
+            "aliases": {
+                "Localize": "Eslym\\EasyLocalize\\Facades\\Localize"
+            }
+        }
+    }
+}
