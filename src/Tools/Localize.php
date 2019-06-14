@@ -69,8 +69,25 @@ class Localize implements LocalizeContract
             return;
         }
         $this->routing = true;
-        $this->router->middleware('locale-redirect')
+        $originalRoutes = $this->router->getRoutes();
+        $this->router->middleware([])
             ->group($routes);
+        foreach ($this->router->getRoutes() as $route) {
+            /** @var Route $route */
+            $headGet = array_intersect($route->methods, ['HEAD', 'GET']);
+            $others = array_diff($route->methods, ['HEAD', 'GET']);
+            if (count($others) > 0){
+                $clone = clone $route;
+                $clone->methods = $others;
+                $originalRoutes->add($clone);
+            }
+            if(count($headGet) > 0){
+                $route->methods = $headGet;
+                $route->middleware(['locale-redirect']);
+                $originalRoutes->add($route);
+            }
+        }
+        $this->router->setRoutes($originalRoutes);
         foreach ($this->accepts as $lang){
             $originalRoutes = $this->router->getRoutes();
             $this->router->setRoutes(new RouteCollection());
@@ -78,10 +95,8 @@ class Localize implements LocalizeContract
                 ->group($routes);
             foreach ($this->router->getRoutes() as $route){
                 /** @var Route $route */
-                $methods = array_flip($route->methods);
-                $methods = array_keys(Arr::only($methods, ['GET', 'HEAD']));
-                if(count($methods) > 0){
-                    $route->methods = $methods;
+                $route->methods = array_intersect($route->methods, ['GET', 'HEAD']);
+                if(count($route->methods) > 0){
                     $uri = $route->uri();
                     $route->setUri($lang.Str::start($uri, '/'));
                     $name = $route->getName();

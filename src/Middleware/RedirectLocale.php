@@ -19,7 +19,7 @@ class RedirectLocale
      */
     public function handle($request, Closure $next)
     {
-        if(!$request->isMethod('GET')){
+        if(!$request->isMethod('GET') && !$request->isMethod('HEAD')){
             return $next($request);
         }
         return Redirect::to(Localize::to(Localize::current()));
