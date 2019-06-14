@@ -15,9 +15,10 @@ interface Localize
 
     /**
      * @param string|string[] $language
+     * @param string $uri
      * @return string|string[]
      */
-    public function to($language);
+    public function to($language, $uri = null);
 
     /**
      * @return string[]

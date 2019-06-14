@@ -10,12 +10,11 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Route;
 use Illuminate\Routing\RouteCollection;
 use Illuminate\Routing\Router;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
-use ReflectionException;
-use ReflectionProperty;
 
 class Localize implements LocalizeContract
 {
@@ -79,12 +78,17 @@ class Localize implements LocalizeContract
                 ->group($routes);
             foreach ($this->router->getRoutes() as $route){
                 /** @var Route $route */
-                $uri = $route->uri();
-                $route->setUri($lang.Str::start($uri, '/'));
-                $name = $route->getName();
-                $route->name(empty($name) ? $name : ".$lang");
-                $route->action['originalName'] = $name;
-                $originalRoutes->add($route);
+                $methods = array_flip($route->methods);
+                $methods = array_keys(Arr::only($methods, ['GET', 'HEAD']));
+                if(count($methods) > 0){
+                    $route->methods = $methods;
+                    $uri = $route->uri();
+                    $route->setUri($lang.Str::start($uri, '/'));
+                    $name = $route->getName();
+                    $route->name(empty($name) ? $name : ".$lang");
+                    $route->action['originalName'] = $name;
+                    $originalRoutes->add($route);
+                }
             }
             $this->router->setRoutes($originalRoutes);
         }
@@ -93,11 +97,12 @@ class Localize implements LocalizeContract
 
     /**
      * @param string|string[] $language
+     * @param string $uri
      * @return string|string[]
      */
-    public function to($language)
+    public function to($language, $uri = null)
     {
-        $uri = $this->request->getRequestUri();
+        $uri = $uri ?? $this->request->getRequestUri();
         $original = ltrim(preg_replace($this->pattern, '', $uri), '/');
         if(is_string($language)){
             $language = urlencode($language);

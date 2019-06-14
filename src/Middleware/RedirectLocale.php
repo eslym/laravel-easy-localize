@@ -6,6 +6,7 @@ namespace Eslym\EasyLocalize\Middleware;
 
 use Closure;
 use Eslym\EasyLocalize\Facades\Localize;
+use Illuminate\Support\Facades\Redirect;
 
 class RedirectLocale
 {
@@ -21,6 +22,6 @@ class RedirectLocale
         if(!$request->isMethod('GET')){
             return $next($request);
         }
-        return redirect()->to(Localize::to(Localize::current()));
+        return Redirect::to(Localize::to(Localize::current()));
     }
 }

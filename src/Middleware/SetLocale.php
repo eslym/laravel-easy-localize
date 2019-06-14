@@ -9,7 +9,6 @@ use Eslym\EasyLocalize\Facades\Localize;
 use Illuminate\Contracts\Cookie\Factory as CookieFactory;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\App;
-use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Redirect;
 
 class SetLocale
@@ -18,7 +17,6 @@ class SetLocale
 
     public function __construct(CookieFactory $cookie)
     {
-
         $this->cookie = $cookie;
     }
 
@@ -34,7 +32,7 @@ class SetLocale
     {
         $lang = $language ?? Localize::current();
         if(isset(Localize::aliases()[$lang])){
-            if($request->isMethod('GET')){
+            if($request->isMethod('GET') || $request->isMethod('HEAD')){
                 $aliases = Localize::aliases()[$lang];
                 $to = in_array(Localize::current(), $aliases) ?
                     Localize::current() : $aliases[0];
