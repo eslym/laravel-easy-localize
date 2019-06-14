@@ -2,10 +2,10 @@
     "name": "eslym/laravel-easy-localize",
     "description": "Laravel Easy Localize",
     "type": "library",
-    "version": "1.0.1",
     "require": {
         "php": ">=7.1",
-        "laravel/framework": ">=5.6 <6.0"
+        "illuminate/support": ">=5.6 <6.0",
+        "illuminate/routing": ">=5.6 <6.0"
     },
     "license": "mit",
     "authors": [

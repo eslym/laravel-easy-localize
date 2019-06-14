@@ -6,10 +6,22 @@ namespace Eslym\EasyLocalize\Middleware;
 
 use Closure;
 use Eslym\EasyLocalize\Facades\Localize;
+use Illuminate\Contracts\Cookie\Factory as CookieFactory;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Cookie;
+use Illuminate\Support\Facades\Redirect;
 
 class SetLocale
 {
+    protected $cookie;
+
+    public function __construct(CookieFactory $cookie)
+    {
+
+        $this->cookie = $cookie;
+    }
+
     /**
      * Handle an incoming request.
      *
@@ -26,14 +38,14 @@ class SetLocale
                 $aliases = Localize::aliases()[$lang];
                 $to = in_array(Localize::current(), $aliases) ?
                     Localize::current() : $aliases[0];
-                return redirect()->to(Localize::to($to));
+                return Redirect::to(Localize::to($to));
             } else {
                 $lang = Localize::current();
             }
         }
-        app()->setLocale($lang);
+        App::setLocale($lang);
         /** @var Response $response */
         $response = $next($request);
-        return $response->withCookie(cookie()->forever('language', app()->getLocale()));
+        return $response->withCookie($this->cookie->forever('language', App::getLocale()));
     }
 }

@@ -6,8 +6,16 @@ namespace Eslym\EasyLocalize\Tools;
 
 use Closure;
 use Eslym\EasyLocalize\Contracts\Localize as LocalizeContract;
-use Illuminate\Support\Facades\Route;
+use Illuminate\Http\Request;
+use Illuminate\Routing\Route;
+use Illuminate\Routing\RouteCollection;
+use Illuminate\Routing\Router;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Str;
 use InvalidArgumentException;
+use ReflectionException;
+use ReflectionProperty;
 
 class Localize implements LocalizeContract
 {
@@ -20,7 +28,15 @@ class Localize implements LocalizeContract
 
     protected $pattern = '';
 
-    public function __construct(array $available)
+    protected $routeNames = [];
+
+    protected $request;
+
+    protected $router;
+
+    protected $routing = false;
+
+    public function __construct(array $available, Request $request, Router $router)
     {
         $this->available = array_unique($available);
         foreach ($this->available as $lang){
@@ -40,6 +56,8 @@ class Localize implements LocalizeContract
         $list = array_map('urlencode', $this->accepts);
         $list = array_map('preg_quote', $list);
         $this->pattern = '/^\/?(?:'.join('|', $list).')(?:\/|\/?$|\/?\?)/';
+        $this->request = $request;
+        $this->router = $router;
     }
 
     /**
@@ -47,13 +65,30 @@ class Localize implements LocalizeContract
      */
     public function routes(Closure $routes): void
     {
-        Route::middleware('locale-redirect')
+        if($this->routing){
+            $this->router->middleware([])->group($routes);
+            return;
+        }
+        $this->routing = true;
+        $this->router->middleware('locale-redirect')
             ->group($routes);
         foreach ($this->accepts as $lang){
-            Route::prefix($lang)->name("$lang.")
-                ->middleware("locale-load:$lang")
+            $originalRoutes = $this->router->getRoutes();
+            $this->router->setRoutes(new RouteCollection());
+            $this->router->middleware("locale-load:$lang")
                 ->group($routes);
+            foreach ($this->router->getRoutes() as $route){
+                /** @var Route $route */
+                $uri = $route->uri();
+                $route->setUri($lang.Str::start($uri, '/'));
+                $name = $route->getName();
+                $route->name(empty($name) ? $name : ".$lang");
+                $route->action['originalName'] = $name;
+                $originalRoutes->add($route);
+            }
+            $this->router->setRoutes($originalRoutes);
         }
+        $this->routing = false;
     }
 
     /**
@@ -62,11 +97,11 @@ class Localize implements LocalizeContract
      */
     public function to($language)
     {
-        $uri = request()->getRequestUri();
+        $uri = $this->request->getRequestUri();
         $original = ltrim(preg_replace($this->pattern, '', $uri), '/');
         if(is_string($language)){
             $language = urlencode($language);
-            return url("$language/$original");
+            return Url::to("$language/$original");
         } else if (is_array($language)){
             return array_combine($language, array_map([$this, 'to'], $language));
         } else {
@@ -103,8 +138,10 @@ class Localize implements LocalizeContract
      */
     public function current(): string
     {
-        $request = request();
-        return $request->cookie('language', $request->getPreferredLanguage($this->accepts) ?? config('app.locale'));
+        return $this->request->cookie(
+            'language',
+            $this->request->getPreferredLanguage($this->accepts)
+        ) ?? Config::get('app.locale', 'en');
     }
 
     /**
@@ -113,6 +150,6 @@ class Localize implements LocalizeContract
      */
     public function name(string $language): string
     {
-        return config("localize.names.$language", $language);
+        return Config::get("localize.names.$language", $language);
     }
 }
