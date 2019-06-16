@@ -35,23 +35,23 @@ class Localize implements LocalizeContract
 
     protected $routing = false;
 
-    public function __construct(array $available, Request $request, Router $router)
+    public function __construct(Request $request, Router $router)
     {
-        $this->available = array_unique($available);
-        foreach ($this->available as $lang){
-            $sub = explode('-', $lang);
-            if(count($sub) == 1 || in_array($sub[0], $this->available)){
-                continue;
+        $available = array_unique(Config::get('localize.available',[]));
+        $settings = Config::get('localize.settings', []);
+        foreach ($available as $lang){
+            if(isset($settings[$lang])){
+                $this->available []= $lang;
+                if(isset($settings[$lang]['group'])){
+                    if(!isset($this->alias[$group = $settings[$lang]['group']])){
+                        $this->alias[$group] = [];
+                    }
+                    $this->alias[$group][]=$lang;
+                    $this->available[]=$group;
+                }
             }
-            $this->alias = array_merge_recursive(
-                $this->alias,
-                [$sub[0] => [$lang]]
-            );
         }
-        $this->accepts = array_merge(
-            $this->available,
-            array_keys($this->alias)
-        );
+        $this->available = array_unique($this->available);
         $list = array_map('urlencode', $this->accepts);
         $list = array_map('preg_quote', $list);
         $this->pattern = '/^\/?(?:'.join('|', $list).')(?:\/|\/?$|\/?\?)/';
@@ -166,10 +166,33 @@ class Localize implements LocalizeContract
 
     /**
      * @param string $language
-     * @return string
+     * @return string|array
      */
-    public function name(string $language): string
+    public function name(?string $language = null)
     {
-        return Config::get("localize.names.$language", $language);
+        if($language === null){
+            return collect(Config::get('localize.settings'))
+                ->only($this->available)
+                ->map(function($lang){return data_get($lang, 'name');})
+                ->toArray();
+        }
+        if(!in_array($language, $this->available)){
+            return null;
+        }
+        return Config::get("localize.settings.$language.name", $language);
+    }
+
+    /**
+     * @param string|null $language
+     * @return array
+     */
+    public function setting(?string $language = null): ?array{
+        if($language === null){
+            return Arr::only(Config::get('localize.settings'), $this->available);
+        }
+        if(!in_array($language, $this->available)){
+            return null;
+        }
+        return Config::get("localize.settings.$language", null);
     }
 }

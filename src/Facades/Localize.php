@@ -17,7 +17,8 @@ use Illuminate\Support\Facades\Facade;
  * @method static string[] available()
  * @method static array[] aliases()
  * @method static string current()
- * @method static string name(string $language)
+ * @method static string|array name(string $language = null)
+ * @method static ?array setting(string $language = null)
  */
 class Localize extends Facade
 {

@@ -41,8 +41,14 @@ interface Localize
     public function current(): string;
 
     /**
-     * @param string $language
-     * @return string
+     * @param string|null $language
+     * @return string|null
      */
-    public function name(string $language): string;
+    public function name(?string $language = null);
+
+    /**
+     * @param string|null $language
+     * @return array|null
+     */
+    public function setting(?string $language = null): ?array;
 }

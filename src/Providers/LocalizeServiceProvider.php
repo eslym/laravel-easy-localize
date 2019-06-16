@@ -39,13 +39,7 @@ class LocalizeServiceProvider extends ServiceProvider
         }
 
         $this->app->singleton(LocalizeContract::class, function (){
-            if(function_exists('resource_path')){
-                $available = array_map('basename', glob(resource_path('lang/*/')));
-            } else {
-                $available = [];
-            }
             return new Localize(
-                Config::get('locale.available', $available),
                 $this->app->get(Request::class),
                 $this->app->get(Router::class)
             );
