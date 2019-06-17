@@ -101,7 +101,7 @@ class Localize implements LocalizeContract
                 $route->methods = array_intersect($route->methods, ['GET', 'HEAD']);
                 if(count($route->methods) > 0){
                     $uri = $route->uri();
-                    $route->setUri($lang.Str::start($uri, '/'));
+                    $route->setUri(rtrim($lang.Str::start($uri, '/'), '/'));
                     $name = $route->getName();
                     $route->name(empty($name) ? $name : ".$lang");
                     $route->action['originalName'] = $name;
