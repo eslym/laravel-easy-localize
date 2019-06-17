@@ -47,11 +47,14 @@ class Localize implements LocalizeContract
                         $this->alias[$group] = [];
                     }
                     $this->alias[$group][]=$lang;
-                    $this->available[]=$group;
                 }
             }
         }
         $this->available = array_unique($this->available);
+        $this->accepts = array_unique(array_merge(
+            $this->available,
+            array_keys($this->alias)
+        ));
         $list = array_map('urlencode', $this->accepts);
         $list = array_map('preg_quote', $list);
         $this->pattern = '/^\/?(?:'.join('|', $list).')(?:\/|\/?$|\/?\?)/';
