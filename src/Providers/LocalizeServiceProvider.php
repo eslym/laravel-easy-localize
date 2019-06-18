@@ -24,7 +24,6 @@ class LocalizeServiceProvider extends ServiceProvider
         /** @var Router $router */
         $router = $this->app['router'];
         $router->aliasMiddleware('locale-redirect', RedirectLocale::class);
-        $router->aliasMiddleware('locale-load', SetLocale::class);
 
         ## Hack into kernel to inject global middleware
         $kernel = $this->app->get(Kernel::class);

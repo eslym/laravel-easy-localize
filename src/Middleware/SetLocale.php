@@ -25,12 +25,11 @@ class SetLocale
      *
      * @param \Illuminate\Http\Request $request
      * @param \Closure $next
-     * @param $language
      * @return mixed
      */
-    public function handle($request, Closure $next, $language = null)
+    public function handle($request, Closure $next)
     {
-        $lang = $language ?? Localize::current();
+        $lang = Localize::current();
         if(isset(Localize::aliases()[$lang])){
             if($request->isMethod('GET') || $request->isMethod('HEAD')){
                 $aliases = Localize::aliases()[$lang];

@@ -35,6 +35,8 @@ class Localize implements LocalizeContract
 
     protected $routing = false;
 
+    protected $current;
+
     public function __construct(Request $request, Router $router)
     {
         $available = array_unique(Config::get('localize.available',[]));
@@ -57,7 +59,7 @@ class Localize implements LocalizeContract
         ));
         $list = array_map('urlencode', $this->accepts);
         $list = array_map('preg_quote', $list);
-        $this->pattern = '/^\/?(?:'.join('|', $list).')(?:\/|\/?$|\/?\?)/';
+        $this->pattern = '/^\/?('.join('|', $list).')(?:\/|\/?$|\/?\?)/';
         $this->request = $request;
         $this->router = $router;
     }
@@ -86,7 +88,6 @@ class Localize implements LocalizeContract
             }
             if(count($headGet) > 0){
                 $route->methods = $headGet;
-                $route->middleware(['locale-redirect']);
                 $originalRoutes->add($route);
             }
         }
@@ -161,10 +162,13 @@ class Localize implements LocalizeContract
      */
     public function current(): string
     {
-        return $this->request->cookie(
-            'language',
-            $this->request->getPreferredLanguage($this->accepts)
-        ) ?? Config::get('app.locale', 'en');
+        return $this->current ?? (
+            $this->current = (
+                $this->fromUri() ??
+                $this->request->cookie('language') ??
+                $this->request->getPreferredLanguage($this->accepts) ??
+                Config::get('app.locale', 'en')
+            ));
     }
 
     /**
@@ -197,5 +201,12 @@ class Localize implements LocalizeContract
             return null;
         }
         return Config::get("localize.settings.$language", null);
+    }
+
+    public function fromUri(): ?string{
+        if(preg_match($this->pattern, $this->request->getRequestUri(), $matches)){
+            return $matches[1];
+        }
+        return null;
     }
 }
