@@ -40,6 +40,10 @@ class Localize implements LocalizeContract
     public function __construct(Request $request, Router $router)
     {
         $available = array_unique(Config::get('localize.available',[]));
+        $available = array_unique(array_merge($available, [
+            Config::get('app.locale', 'en'),
+            Config::get('app.fallback_locale', 'en')
+        ]));
         $settings = Config::get('localize.settings', []);
         foreach ($available as $lang){
             if(isset($settings[$lang])){
