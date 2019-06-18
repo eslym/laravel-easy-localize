@@ -92,6 +92,7 @@ class Localize implements LocalizeContract
             }
             if(count($headGet) > 0){
                 $route->methods = $headGet;
+                $route->middleware(['locale-redirect']);
                 $originalRoutes->add($route);
             }
         }
@@ -99,8 +100,7 @@ class Localize implements LocalizeContract
         foreach ($this->accepts as $lang){
             $originalRoutes = $this->router->getRoutes();
             $this->router->setRoutes(new RouteCollection());
-            $this->router->middleware("locale-load:$lang")
-                ->group($routes);
+            $this->router->middleware([])->group($routes);
             foreach ($this->router->getRoutes() as $route){
                 /** @var Route $route */
                 $route->methods = array_intersect($route->methods, ['GET', 'HEAD']);
