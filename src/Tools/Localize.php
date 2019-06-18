@@ -79,6 +79,7 @@ class Localize implements LocalizeContract
         }
         $this->routing = true;
         $originalRoutes = $this->router->getRoutes();
+        $this->router->setRoutes(new RouteCollection());
         $this->router->middleware([])
             ->group($routes);
         foreach ($this->router->getRoutes() as $route) {
