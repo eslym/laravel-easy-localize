@@ -5,7 +5,6 @@ namespace Illuminate\Routing {
          * Get the original route name before localized
          *
          * @return string
-         * @instantiated
          */
         public function getOriginalName() {
 
@@ -15,9 +14,8 @@ namespace Illuminate\Routing {
          *
          * @param string ...$patterns
          * @return boolean
-         * @instantiated
          */
-        public function originalNamed($patterns) {
+        public function originalNamed(...$patterns) {
 
         }
     }
