@@ -45,12 +45,6 @@ class LocalizeServiceProvider extends ServiceProvider
         });
         $this->app->alias(LocalizeContract::class, 'localize');
 
-        /**
-         * Get the original route name before localized
-         *
-         * @return string
-         * @instantiated
-         */
         Route::macro('getOriginalName', function () : ?string{
             /** @var Route $self */
             $self = $this;
@@ -61,13 +55,6 @@ class LocalizeServiceProvider extends ServiceProvider
             }
         });
 
-        /**
-         * Match the current original route name with pattern
-         *
-         * @param string[] $patterns
-         * @return boolean
-         * @instantiated
-         */
         Route::macro('originalNamed', function (...$patterns)
         {
             /** @var Route $self */
