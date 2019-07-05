@@ -170,7 +170,7 @@ class Localize implements LocalizeContract
         return $this->current ?? (
             $this->current = (
                 $this->fromUri() ??
-                $this->request->cookie('language') ??
+                $this->fromCookie() ??
                 $this->request->getPreferredLanguage($this->accepts) ??
                 Config::get('app.locale', 'en')
             ));
@@ -213,5 +213,10 @@ class Localize implements LocalizeContract
             return $matches[1];
         }
         return null;
+    }
+
+    public function fromCookie(): ?string{
+        $lang = $this->request->cookie('language');
+        return in_array($lang, $this->accepts()) ? $lang : null;
     }
 }
